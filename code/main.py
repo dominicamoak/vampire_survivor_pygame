@@ -1,11 +1,13 @@
 from settings import *
+from player import *
 
-# General Setup
-pygame.init()
-pygame.display.set_caption('VAMPIRE SURVIVOR')
 
 class Game():
     def __init__(self):
+        # General Setup
+        pygame.init()
+        pygame.display.set_caption('VAMPIRE SURVIVOR')
+        
         self.running = True
         self.clock = pygame.time.Clock()
         
@@ -14,7 +16,7 @@ class Game():
         
         # Sprites
         self.all_sprites = pygame.sprite.Group()
-        self.player = Player(self.all_sprites)
+        self.player = Player(self.all_sprites, (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
     
     def run(self):
         while self.running:
@@ -23,6 +25,8 @@ class Game():
             self.events()
             self.update()
             self.draw()
+            
+        pygame.quit()
         
     # Event Loop
     def events(self):
@@ -43,25 +47,8 @@ class Game():
 
 
 
+if __name__ == '__main__':
+    game = Game()
+    game.run()
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, groups):
-        super().__init__(groups)
-        self.image = pygame.image.load(join('images', 'player', 'down', f'{0}.png')).convert_alpha()
-        self.rect = self.image.get_frect(center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2))
-        self.direction = pygame.Vector2()
-        self.speed = 300
-            
-    def update(self, dt):
-        keys = pygame.key.get_pressed()
-        self.direction.x = int(keys[pygame.K_RIGHT]) - int(keys[pygame.K_LEFT])
-        self.direction.y = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
-        self.direction = self.direction.normalize() if self.direction else self.direction
-        self.rect.center += self.direction * self.speed * dt
-
-game = Game()
-game.run()
-
-
-pygame.quit()
 
