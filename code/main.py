@@ -63,8 +63,8 @@ class Game():
     # Draw Game
     def draw(self):
         self.display_surface.fill('#276938')
-        self.all_sprites.draw(self.display_surface)
-
+        self.all_sprites.draw(self.player.rect.center)
+        
         pygame.display.update()
 
 
