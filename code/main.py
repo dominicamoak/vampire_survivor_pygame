@@ -44,29 +44,22 @@ class Game():
     def run(self):
         while self.running:
             self.game_events = pygame.event.get()
-            self.dt = self.clock.tick(60) / 1000
-            self.events()
-            self.update()
-            self.draw()
+            dt = self.clock.tick() / 1000
+            
+            # Event Loop
+            for event in self.game_events:
+                if event.type == pygame.QUIT:
+                    self.running = False
+            
+            # Updates
+            self.all_sprites.update(dt)
+            
+            # Draw Game
+            self.display_surface.fill('#276938')
+            self.all_sprites.draw(self.player.rect.center)
+            pygame.display.update()
             
         pygame.quit()
-    
-    # Event Loop
-    def events(self):
-        for event in self.game_events:
-            if event.type == pygame.QUIT:
-                self.running = False
-    
-    # Updates
-    def update(self):
-        self.all_sprites.update(self.dt)
-    
-    # Draw Game
-    def draw(self):
-        self.display_surface.fill('#276938')
-        self.all_sprites.draw(self.player.rect.center)
-
-        pygame.display.update()
 
 
 
