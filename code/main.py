@@ -21,8 +21,33 @@ class Game():
         # Groups
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
+        self.bullet_sprites = pygame.sprite.Group()
         
+        self.load_images()
         self.setup()
+        
+        # Gun Timer
+        self.can_shoot = True
+        self.shoot_time = 0
+        self.gun_resttime = 100
+    
+    def load_images(self):
+        self.bullet_surf = pygame.image.load(join('images', 'gun', 'bullet.png')).convert_alpha()
+    
+    # Inputs
+    def input(self):
+        if pygame.mouse.get_pressed()[0] and self.can_shoot:
+            pos = self.gun.rect.center + self.gun.player_direction * 50
+            self.bullet = Bullet((self.all_sprites, self.bullet_sprites), self.bullet_surf, pos, self.gun.player_direction)
+            self.can_shoot = False
+            self.shoot_time = pygame.time.get_ticks()
+    
+    # Gun Timer
+    def gun_timer(self):
+        if not self.can_shoot:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.shoot_time >= self.gun_resttime:
+                self.can_shoot = True
     
     # Scene Setup
     def setup(self):
@@ -53,6 +78,8 @@ class Game():
                     self.running = False
             
             # Updates
+            self.gun_timer()
+            self.input()
             self.all_sprites.update(dt)
             
             # Draw Game

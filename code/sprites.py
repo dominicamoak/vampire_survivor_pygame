@@ -47,7 +47,9 @@ class Gun(pygame.sprite.Sprite):
         self.rect.center = self.player.rect.center + self.player_direction * self.distance
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, groups, pos):
+    def __init__(self, groups, surf, pos, direction):
         super().__init__(groups)
-        self.image = pygame.image.load(join('images', 'gun', 'bullet.png'))
+        self.image = surf
         self.rect = self.image.get_frect(center = pos)
+    
+    
