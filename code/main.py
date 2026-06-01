@@ -23,9 +23,6 @@ class Game():
         self.collision_sprites = pygame.sprite.Group()
         
         self.setup()
-        
-        # Sprites / Groups
-        self.player = Player(self.all_sprites, (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), self.collision_sprites)
     
     # Scene Setup
     def setup(self):
@@ -38,6 +35,10 @@ class Game():
         
         for block in map.get_layer_by_name('Collisions'):
             CollisionSprite((self.collision_sprites), (block.x, block.y), pygame.Surface((block.width, block.height)))
+        
+        for entity in map.get_layer_by_name('Entities'):
+            if entity.name == 'Player':
+                self.player = Player(self.all_sprites, (entity.x, entity.y), self.collision_sprites)
     
     # Run
     def run(self):
@@ -64,7 +65,7 @@ class Game():
     def draw(self):
         self.display_surface.fill('#276938')
         self.all_sprites.draw(self.player.rect.center)
-        
+
         pygame.display.update()
 
 
