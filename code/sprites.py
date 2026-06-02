@@ -61,3 +61,49 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center += self.direction * self.speed * dt
         if pygame.time.get_ticks() - self.appear_time >= self.lifetime:
             self.kill()
+
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, groups, frames, pos, player, collision_sprites):
+        super().__init__(groups)
+        self.player = player
+        self.frames, self.frame_index = frames, 0
+        self.image = self.frames[self.frame_index]
+        self.rect = self.image.get_frect(center = pos)
+        self.hitbox_rect = self.rect.inflate(-20, -40)
+        self.collision_sprites = collision_sprites
+        self.animation_speed = 5
+        self.direction = pygame.Vector2()
+        self.speed = 350
+    
+    def animate(self, dt):
+        self.frame_index += self.animation_speed * dt
+        self.image = self.frames[int(self.frame_index) % len(self.frames)]
+    
+    def move(self, dt):
+        # Get Direction
+        enemy_pos = pygame.Vector2(self.rect.center)
+        player_pos = pygame.Vector2(self.player.rect.center)
+        self.direction = (player_pos - enemy_pos).normalize()
+        
+        # Update the rect pos + collision
+        self.hitbox_rect.x += self.direction.x * self.speed * dt
+        self.collisions('horizontal')
+        self.hitbox_rect.y += self.direction.y * self.speed * dt
+        self.collisions('vertical')
+        self.rect.center = self.hitbox_rect.center
+    
+    def collisions(self, direction):
+        for sprite in self.collision_sprites:
+            if sprite.rect.colliderect(self.hitbox_rect):
+                if direction == 'horizontal':
+                    if self.direction.x > 0: self.hitbox_rect.right = sprite.rect.left
+                    if self.direction.x < 0: self.hitbox_rect.left = sprite.rect.right
+                if direction == 'vertical':
+                    if self.direction.y > 0: self.hitbox_rect.bottom = sprite.rect.top
+                    if self.direction.y < 0: self.hitbox_rect.top = sprite.rect.bottom
+    
+    def update(self, dt):
+        self.move(dt)
+        self.animate(dt)
+
+

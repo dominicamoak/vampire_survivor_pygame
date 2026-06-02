@@ -2,8 +2,9 @@ from settings import *
 from player import Player
 from sprites import *
 from groups import AllSprites
+
 from pytmx.util_pygame import load_pygame
-from random import randint
+from random import randint, choice
 
 
 class Game():
@@ -22,17 +23,32 @@ class Game():
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
         self.bullet_sprites = pygame.sprite.Group()
-        
-        self.load_images()
-        self.setup()
+        self.enemy_sprites = pygame.sprite.Group()
         
         # Gun Timer
         self.can_shoot = True
         self.shoot_time = 0
         self.gun_resttime = 100
+        
+        # Enemy Timer
+        self.enemy_event = pygame.event.custom_type()
+        pygame.time.set_timer(self.enemy_event, 500)
+        self.appear_pos = []
+
+        self.load_images()
+        self.setup()
     
     def load_images(self):
         self.bullet_surf = pygame.image.load(join('images', 'gun', 'bullet.png')).convert_alpha()
+        folders = list(walk(join('images', 'enemies')))[0][1]
+        self.enemy_frames = {}
+        for folder in folders:
+            for folder_path, _, file_names in walk(join('images', 'enemies', folder)):
+                self.enemy_frames[folder] = []
+                for file_name in sorted(file_names, key = lambda name: int(name.split('.')[0])):
+                    full_path = join(folder_path, file_name)
+                    surf = pygame.image.load(full_path).convert_alpha()
+                    self.enemy_frames[folder].append(surf)
     
     # Inputs
     def input(self):
@@ -45,8 +61,8 @@ class Game():
     # Gun Timer
     def gun_timer(self):
         if not self.can_shoot:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.shoot_time >= self.gun_resttime:
+            gun_current_time = pygame.time.get_ticks()
+            if gun_current_time - self.shoot_time >= self.gun_resttime:
                 self.can_shoot = True
     
     # Scene Setup
@@ -65,6 +81,13 @@ class Game():
             if entity.name == 'Player':
                 self.player = Player(self.all_sprites, (entity.x, entity.y), self.collision_sprites)
                 self.gun = Gun(self.all_sprites, self.player)
+            if entity.name == 'Enemy':
+                self.appear_pos.append((entity.x, entity.y))
+    
+    # def collisions(self):
+    #     collision_sprites = pygame.sprite.spritecollide(self.bullet, self.enemy_sprites, True, pygame.sprite.collide_mask)
+    #     if collision_sprites:
+    #         print('bullet hit')
     
     # Run
     def run(self):
@@ -76,11 +99,14 @@ class Game():
             for event in self.game_events:
                 if event.type == pygame.QUIT:
                     self.running = False
+                if event.type == self.enemy_event:
+                    Enemy((self.all_sprites, self.enemy_sprites), choice(list(self.enemy_frames.values())), choice(self.appear_pos), self.player, self.collision_sprites)
             
             # Updates
             self.gun_timer()
             self.input()
             self.all_sprites.update(dt)
+            # self.collisions()
             
             # Draw Game
             self.display_surface.fill('#276938')
