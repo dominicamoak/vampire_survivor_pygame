@@ -34,7 +34,16 @@ class Game():
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 500)
         self.appear_pos = []
-
+        
+        # Game Sounds
+        self.impact_sound = pygame.mixer.Sound(join('audio', 'impact.ogg'))
+        self.impact_sound.set_volume(0.05)
+        self.game_music = pygame.mixer.Sound(join('audio', 'music.wav'))
+        self.game_music.set_volume(0.1)
+        self.game_music.play(loops = -1)
+        self.shoot_sound = pygame.mixer.Sound(join('audio', 'shoot.wav'))
+        self.shoot_sound.set_volume(0.05)
+        
         self.load_images()
         self.setup()
     
@@ -49,6 +58,9 @@ class Game():
                     full_path = join(folder_path, file_name)
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
+    
+    # Game Sound
+    # def game_sound(self):    
     
     # Inputs
     def input(self):
@@ -84,10 +96,18 @@ class Game():
             if entity.name == 'Enemy':
                 self.appear_pos.append((entity.x, entity.y))
     
-    # def collisions(self):
-    #     collision_sprites = pygame.sprite.spritecollide(self.bullet, self.enemy_sprites, True, pygame.sprite.collide_mask)
-    #     if collision_sprites:
-    #         print('bullet hit')
+    def bullet_collisions(self):
+        if self.bullet_sprites:
+            for bullet in self.bullet_sprites:
+                collision_sprites = pygame.sprite.spritecollide(bullet, self.enemy_sprites, False, pygame.sprite.collide_mask)
+                if collision_sprites:
+                    for sprite in collision_sprites:
+                        sprite.destroy()
+                    bullet.kill()
+    
+    def player_collisions(self):
+        if pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask):
+            self.running = False
     
     # Run
     def run(self):
@@ -106,7 +126,8 @@ class Game():
             self.gun_timer()
             self.input()
             self.all_sprites.update(dt)
-            # self.collisions()
+            self.bullet_collisions()
+            self.player_collisions()
             
             # Draw Game
             self.display_surface.fill('#276938')
