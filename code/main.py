@@ -37,12 +37,12 @@ class Game():
         
         # Game Sounds
         self.impact_sound = pygame.mixer.Sound(join('audio', 'impact.ogg'))
-        self.impact_sound.set_volume(0.05)
+        self.impact_sound.set_volume(0.5)
         self.game_music = pygame.mixer.Sound(join('audio', 'music.wav'))
-        self.game_music.set_volume(0.1)
+        self.game_music.set_volume(0.2)
         self.game_music.play(loops = -1)
         self.shoot_sound = pygame.mixer.Sound(join('audio', 'shoot.wav'))
-        self.shoot_sound.set_volume(0.05)
+        self.shoot_sound.set_volume(0.3)
         
         self.load_images()
         self.setup()
@@ -59,12 +59,10 @@ class Game():
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
     
-    # Game Sound
-    # def game_sound(self):    
-    
     # Inputs
     def input(self):
         if pygame.mouse.get_pressed()[0] and self.can_shoot:
+            self.shoot_sound.play()
             pos = self.gun.rect.center + self.gun.player_direction * 50
             self.bullet = Bullet((self.all_sprites, self.bullet_sprites), self.bullet_surf, pos, self.gun.player_direction)
             self.can_shoot = False
@@ -101,6 +99,7 @@ class Game():
             for bullet in self.bullet_sprites:
                 collision_sprites = pygame.sprite.spritecollide(bullet, self.enemy_sprites, False, pygame.sprite.collide_mask)
                 if collision_sprites:
+                    self.impact_sound.play()
                     for sprite in collision_sprites:
                         sprite.destroy()
                     bullet.kill()

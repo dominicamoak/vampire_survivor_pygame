@@ -73,7 +73,7 @@ class Enemy(pygame.sprite.Sprite):
         self.collision_sprites = collision_sprites
         self.animation_speed = 5
         self.direction = pygame.Vector2()
-        self.speed = 350
+        self.speed = 150
         
         # Timer
         self.death_time = 0
