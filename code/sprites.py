@@ -63,7 +63,7 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, groups, frames, pos, player, collision_sprites):
+    def __init__(self, groups, frames, pos, player, collision_sprites, add_score):
         super().__init__(groups)
         self.player = player
         self.frames, self.frame_index = frames, 0
@@ -74,6 +74,9 @@ class Enemy(pygame.sprite.Sprite):
         self.animation_speed = 5
         self.direction = pygame.Vector2()
         self.speed = 150
+        self.enemy_health = 1
+        self.is_dying = False
+        self.add_score = add_score
         
         # Timer
         self.death_time = 0
@@ -106,6 +109,16 @@ class Enemy(pygame.sprite.Sprite):
                     if self.direction.y > 0: self.hitbox_rect.bottom = sprite.rect.top
                     if self.direction.y < 0: self.hitbox_rect.top = sprite.rect.bottom
     
+    def take_damage(self):
+        if self.is_dying:
+            return
+        
+        self.enemy_health -= 1
+        
+        if self.enemy_health <= 0:
+            self.is_dying = True
+            self.destroy()
+    
     def destroy(self):
         # Start timer and destroy sprite
         self.death_time = pygame.time.get_ticks()
@@ -114,13 +127,16 @@ class Enemy(pygame.sprite.Sprite):
         surf = pygame.mask.from_surface(self.frames[0]).to_surface()
         surf.set_colorkey('#000000')
         self.image = surf
+        
+        # Increase Score
+        self.add_score(10)
     
     def death_timer(self):
         if pygame.time.get_ticks() - self.death_time >= self.death_duration:
             self.kill()
     
     def update(self, dt):
-        if self.death_time == 0:
+        if not self.is_dying:
             self.move(dt)
             self.animate(dt)
         else:
